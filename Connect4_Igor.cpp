@@ -165,6 +165,23 @@ int antiDiagUtil(Node n){
   return util;
 }
 
+int utility(Node n){
+  int soma = 0;
+  if(verutil(n) == 512 || horutil(n) == 512 || diagMainUtil(n) == 512 || antiDiagUtil(n) == 512){
+    return 512;
+  }
+  else if(verutil(n) == -512 || horutil(n) == -512 || diagMainUtil(n) == -512 || antiDiagUtil(n) == -512){
+    return -512;
+  }
+  else{
+    soma += verutil(n);
+    soma += horutil(n);
+    soma += diagMainUtil(n);
+    soma += antiDiagUtil(n);
+  return soma;
+  }
+}
+
 int horver(int linha, int col, Node n){ //VERIFICA SE HA 4 IGUAIS NA HORIZONTAL
   int coltemp = col;
   int lintemp = linha;
@@ -298,9 +315,9 @@ void verif(int linha, int col, Node n){
 
 void input(char c, int col, Node n){
   int linha = 5;
-  while(n->tabu[linha][col] != '-') // procura o proximo lugar livre da coluna
+  while(n->tabu[linha][col] != '-'){ // procura o proximo lugar livre da coluna
     linha--;
-  
+  }
   n->tabu[linha][col] = c;
   printt(n);
   verif(linha, col, n);
@@ -314,7 +331,7 @@ int main(int argc, char **argv){
   printt(tab1);
 
   int random = 0;
-
+  int erro_input = 0;
   //int i=0;
   int jog;
   int vez = 1;
@@ -328,6 +345,7 @@ int main(int argc, char **argv){
       printf("Score Linhas: %d\n", verutil(tab1));
       printf("Score diagonal 1: %d\n", diagMainUtil(tab1));
       printf("Score diagonal 2: %d\n", antiDiagUtil(tab1));
+      cout<<"Utilty: " << utility(tab1) << endl;
     }
     if(vez == 2){
       cout << "IA (O)" << endl;
@@ -340,6 +358,7 @@ int main(int argc, char **argv){
       printf("Score Linhas: %d\n", verutil(tab1));
       printf("Score diagonal 1: %d\n", diagMainUtil(tab1));
       printf("Score diagonal 2: %d\n", antiDiagUtil(tab1));
+      cout<<"Utilty: " << utility(tab1) << endl;
     }
     if(vez == 2)
       vez = 1;
