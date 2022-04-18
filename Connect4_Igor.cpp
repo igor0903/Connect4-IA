@@ -1,4 +1,7 @@
 #include <iostream>
+#include<algorithm>
+#include<cstdlib>
+#include<ctime>
 
 using namespace std;
 
@@ -310,6 +313,8 @@ int main(int argc, char **argv){
   Node tab1 = des();
   printt(tab1);
 
+  int random = 0;
+
   //int i=0;
   int jog;
   int vez = 1;
@@ -325,8 +330,10 @@ int main(int argc, char **argv){
       printf("Score diagonal 2: %d\n", antiDiagUtil(tab1));
     }
     if(vez == 2){
-      cout << "Jogador 2 (O)" << endl;
-      cin >> jog;
+      cout << "IA (O)" << endl;
+      srand (time(NULL));
+      random=rand() % 7 + 1; //number entre 1 e 7
+      jog = random;
       jogadas++;
       input('O', jog-1, tab1);
       printf("Score Colunas: %d\n", horutil(tab1));
