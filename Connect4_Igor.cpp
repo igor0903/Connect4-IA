@@ -22,6 +22,9 @@ bool input(char c, int col, Node n);
 void input_interno(char c, int col, Node n);
 int minimize(Node n, int depth, bool c);
 int maximize(Node n, int depth, bool c);
+int minimizeAlphaBeta(Node n, int depth, int alpha, int beta, bool c);
+int maximizeAlphaBeta(Node n, int depth, int alpha, int beta, bool c);
+
 
 Node des(){
   Node aux = (Node)malloc(sizeof(struct node));
@@ -34,7 +37,7 @@ Node des(){
 }
 
 Node mknode(Node n, int col, char c){
-  numerodenos++;
+  //numerodenos++;
   Node aux = (Node)malloc(sizeof(struct node));
   
   for(int i=0; i<6; i++){
@@ -411,6 +414,7 @@ int minimax(Node n, int depth, bool c){
   for(int i = 0; i < 7; i++){
     if(valid_locations(n, i)){
       n->filhos[i] = mknode(n, i, 'X');
+      numerodenos++;
       new_score = maximize(n->filhos[i], depth -1, false);
       if(new_score > value){
         value = new_score;
@@ -423,14 +427,16 @@ int minimax(Node n, int depth, bool c){
 int maximize(Node n, int depth, bool c){
   int value;
   int new_score;
-  verif_interno(6,7,n);
-  if(depth == 0 || verific_interno == 1 || verific_interno == -1){
+  int aux_veri = utility(n);
+  //verif_interno(6,7,n);
+  if(depth == 0 || aux_veri == 512 || aux_veri == -512){
     return utility(n);
   } //MAXIMIZAR O JOGADOR X
   value = -99999999;
   for(int i = 0; i < 7; i++){
     if(valid_locations(n, i)){
       n->filhos[i] = mknode(n, i, 'X');
+      numerodenos++;
       new_score = minimize(n->filhos[i], depth -1, false);
       if(new_score > value){
         value = new_score;
@@ -443,8 +449,9 @@ int maximize(Node n, int depth, bool c){
 int minimize(Node n, int depth, bool c){
   int value;
   int new_score;
-  verif_interno(6,7,n);
-  if(depth == 0 || verific_interno == 1 || verific_interno == -1){
+  int aux_veri = utility(n);
+  //verif_interno(6,7,n);
+  if(depth == 0 || aux_veri == 512 || aux_veri == -512){
     return utility(n);
   }
   else{
@@ -452,7 +459,8 @@ int minimize(Node n, int depth, bool c){
     for(int i = 0; i < 7; i++){
       if(valid_locations(n, i)){
         n->filhos[i] = mknode(n, i, 'O');
-        new_score = maximize(n->filhos[i], depth -1, true);
+        numerodenos++;
+        new_score = maximize(n->filhos[i], (depth-1), true);
         if(new_score < value){
           value = new_score;
         }
@@ -462,6 +470,76 @@ int minimize(Node n, int depth, bool c){
   }
 }
 
+int alphaBeta(Node n, int depth, int alpha, int beta, bool c){
+  int value;
+  int new_score;
+  value = -99999999;
+  for(int i = 0; i < 7; i++){
+    if(valid_locations(n, i)){
+      n->filhos[i] = mknode(n, i, 'X');
+      numerodenos++;
+      new_score = maximizeAlphaBeta(n->filhos[i], (depth-1), alpha, beta, false);
+      if(new_score > value){
+        value = new_score;
+        coluna = i;
+      }
+    }
+  }
+  return coluna;
+}
+int maximizeAlphaBeta(Node n, int depth, int alpha, int beta, bool c){
+  int value;
+  int new_score;
+  int aux_veri = utility(n);
+  //verif_interno(6,7,n);
+  if(depth == 0 || aux_veri == 512 || aux_veri == -512){
+    return utility(n);
+  } //MAXIMIZAR O JOGADOR X
+  value = -99999999;
+  for(int i = 0; i < 7; i++){
+    if(valid_locations(n, i)){
+      n->filhos[i] = mknode(n, i, 'X');
+      numerodenos++;
+      new_score = minimizeAlphaBeta(n->filhos[i], (depth-1), alpha, beta, false);
+      if(new_score > value){
+        value = new_score;
+      }
+      alpha = max(alpha, value);
+      if (alpha >= beta){
+        i = 7;
+      }
+    }
+  }
+  return value;
+}
+
+int minimizeAlphaBeta(Node n, int depth, int alpha, int beta, bool c){
+  int value;
+  int new_score;
+  int aux_veri = utility(n);
+  //verif_interno(6,7,n);
+  if(depth == 0 || aux_veri == 512 || aux_veri == -512){
+    return utility(n);
+  }
+  else{
+    value = 99999999;
+    for(int i = 0; i < 7; i++){
+      if(valid_locations(n, i)){
+        n->filhos[i] = mknode(n, i, 'O');
+        numerodenos++;
+        new_score = maximizeAlphaBeta(n->filhos[i], (depth-1), alpha, beta, true);
+        if(new_score < value){
+          value = new_score;
+        }
+        beta = min(beta, value);
+        if (beta <= alpha){
+          i = 7;
+        }
+      }
+    }
+    return value;
+  }
+}
 
 int main(int argc, char **argv){
 
@@ -475,16 +553,21 @@ int main(int argc, char **argv){
   while(jogadas < 42 && verific == 0){
     if(vez == 1){
       //cin >> jog;
-      jog = minimax(tab1, 3, true); //profundidade 3 ja apresentar um bom nivel de resposta da IA para equilibrar tempo e qualidade da resposta
-      cout << jog << endl;
+      //jog = minimax(tab1, 5, true); //profundidade 3 ja apresentar um bom nivel de resposta da IA para equilibrar tempo e qualidade da resposta
+      jog = alphaBeta(tab1, 5, -99999999, 99999999, true);
+      //cout << jog << endl;
       jogadas++;
       input2('X', jog, tab1);
       verif(6,7,tab1);
+      cout << "-------------------------------------------------" << endl;
       printf("Score Colunas: %d\n", horutil(tab1));
       printf("Score Linhas: %d\n", verutil(tab1));
       printf("Score diagonal 1: %d\n", diagMainUtil(tab1));
       printf("Score diagonal 2: %d\n", antiDiagUtil(tab1));
       cout<<"Utilty: " << utility(tab1) << endl;
+      cout << "-------------------------------------------------" << endl;
+    cout <<"Numero de nós totais durante o jogo: " << numerodenos << endl;
+      cout << "-------------------------------------------------" << endl;
     }
     if(vez == 2){
       cout << "Sua vez, Jogador (O)" << endl;
@@ -497,11 +580,15 @@ int main(int argc, char **argv){
         cin >> jog;
       }
       verif(6,7,tab1);
+      cout << "-------------------------------------------------" << endl;
       printf("Score Colunas: %d\n", horutil(tab1));
       printf("Score Linhas: %d\n", verutil(tab1));
       printf("Score diagonal 1: %d\n", diagMainUtil(tab1));
       printf("Score diagonal 2: %d\n", antiDiagUtil(tab1));
       cout<<"Utilty: " << utility(tab1) << endl;
+      cout << "-------------------------------------------------" << endl;
+      cout <<"Numero de nós totais durante o jogo: " << numerodenos << endl;
+      cout << "-------------------------------------------------" << endl;
       //cout<<"minimax: " << minimax(tab1) << endl;
     }
     if(vez == 2)
@@ -509,14 +596,18 @@ int main(int argc, char **argv){
     else
       vez = 2;
     printf("jogadas:%d\n", jogadas);
+    cout << "-------------------------------------------------" << endl;
   }
-    if(verific == -1)
-      printf("Empate\n");
-    else{
-      if(jogadas%2 == 0)
-       printf("Jogador ganhou\n");
-     else
-       printf("AI ganhou\n");
-    }
+  
+  if(verific == -1)
+    printf("Empate\n");
+  else{
+    if(jogadas%2 == 0)
+      printf("Jogador ganhou\n");
+    else
+      printf("IA ganhou\n");
+  }
+  cout << "-------------------------------------------------" << endl;
+  cout <<"Numero de nós totais durante o jogo: " << numerodenos << endl;
   return 0;
 }
